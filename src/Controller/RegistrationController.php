@@ -22,19 +22,35 @@ class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
 
+    public const TOKEN = '$2y$10$MGMtPzWXFOFosK4gwGio1e.l6OP2gvA72sCfKKQ76u.6WC5gVQUJ6';
+    public const COUNTRY_ID = 1;
+    public const STATU_ID = 0;
+    public const IS_BUYER = 0;
+    public const IS_VERIFIED = 0;
+
     public function __construct(EmailVerifier $emailVerifier)
     {
         $this->emailVerifier = $emailVerifier;
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, UserAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, UserAuthenticator $authenticator, EntityManagerInterface $entityManager)
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+             // return new Response($form);
+
+            // print_r($form->isValid());
+
+            // exit;
+
+        // return $this->json('data');
+
+
             // encode the plain password
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
@@ -43,19 +59,28 @@ class RegistrationController extends AbstractController
                 )
             );
 
-           
-            $first_name = $request->get('first_name');
-            $last_name = $request->get('last_name');
-            $token = '$2y$10$MGMtPzWXFOFosK4gwGio1e.l6OP2gvA72sCfKKQ76u.6WC5gVQUJ6';
-            $country_id = 1;
-            $statu_id = 0;
-            $is_buyer = 0;
 
+            // extraemos campos del form, getData lo usamos para que sea request y no form
+            $first_name = $form->get('first_name')->getData();
+            $last_name = $form->get('last_name')->getData();
+            // $token = '$2y$10$MGMtPzWXFOFosK4gwGio1e.l6OP2gvA72sCfKKQ76u.6WC5gVQUJ6';
+            // $country_id = 1;
+            // $statu_id = 0;
+            // $is_buyer = 0;
+            // $is_verified = 0;
 
             $user->setFirstName($first_name);
             $user->setLastName($last_name);
-            // $user->setEmail($email);
-            // $user->setPassword($password);
+            // $user->setToken($token);
+            $user->setToken(self::TOKEN);
+            // $user->setCountryId($country_id);
+            $user->setCountryId(self::COUNTRY_ID);
+            // $user->setStatuId($statu_id);
+            $user->setStatuId(self::STATU_ID);
+            // $user->setIsBuyer($is_buyer);
+            $user->setIsBuyer(self::IS_BUYER);
+            // $user->setIsVerified($is_verified);
+            $user->setIsVerified(self::IS_VERIFIED);              
 
 
             $entityManager->persist($user);
